@@ -38,6 +38,13 @@ export default function Home() {
   const [messageId, setMessageId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleFigureChange = () => {
+    // Clear messages when switching figures
+    setMessages([]);
+    setSelectedFigure(null);
+    setMessageId(0);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || !selectedFigure || isLoading) return;
@@ -152,16 +159,24 @@ export default function Home() {
       {/* Chat container */}
       <main className="flex-1 p-4 overflow-y-auto">
         <div className="max-w-3xl mx-auto space-y-4">
-          <div className="flex items-center gap-4 p-4 bg-white rounded-lg shadow">
-            <div className="relative w-16 h-16">
-              <Image
-                src={selectedFigure.imageUrl}
-                alt={selectedFigure.name}
-                fill
-                className="object-cover rounded-full"
-              />
+          <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+            <div className="flex items-center gap-4">
+              <div className="relative w-16 h-16">
+                <Image
+                  src={selectedFigure.imageUrl}
+                  alt={selectedFigure.name}
+                  fill
+                  className="object-cover rounded-full"
+                />
+              </div>
+              <h1 className="text-xl font-bold">Chat with {selectedFigure.name}</h1>
             </div>
-            <h1 className="text-xl font-bold">Chat with {selectedFigure.name}</h1>
+            <button
+              onClick={handleFigureChange}
+              className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Change Figure
+            </button>
           </div>
           
           {messages.length === 0 ? (
