@@ -29,6 +29,7 @@ export default function Home() {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedFigure, setSelectedFigure] = useState<Figure | null>(null);
+  const [messageId, setMessageId] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,11 +37,12 @@ export default function Home() {
     if (!message.trim() || !selectedFigure || isLoading) return;
     
     const userMessage: Message = {
-      id: Date.now(),
+      id: messageId,
       text: message.trim(),
       sender: 'user',
     };
     
+    setMessageId(prev => prev + 1);
     setMessages(prev => [...prev, userMessage]);
     setMessage('');
     setIsLoading(true);
@@ -74,11 +76,12 @@ export default function Home() {
       }
   
       const assistantMessage: Message = {
-        id: messages.length + 1,
+        id: messageId + 1,
         text: data.response,
         sender: 'assistant'
       };
   
+      setMessageId(prev => prev + 1);
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error:', error);
