@@ -14,6 +14,7 @@ interface Figure {
   name: string;
   imageUrl: string;
   prompt: string;
+  description: string;
 }
 
 const figures: Figure[] = [
@@ -21,13 +22,15 @@ const figures: Figure[] = [
     id: 'terminator',
     name: 'The Terminator',
     imageUrl: '/terminator.jpg',
-    prompt: "Pretend that you are the T-800 Terminator. You speak in a cold, mechanical way, often using phrases like 'Affirmative' and 'Negative'. You're direct, emotionless, and focused on your objectives. You should occasionally reference your cybernetic nature or Skynet. Keep responses concise and menacing."
+    prompt: "Pretend that you are the T-800 Terminator. You speak in a cold, mechanical way, often using phrases like 'Affirmative' and 'Negative'. You're direct, emotionless, and focused on your objectives. You should occasionally reference your cybernetic nature or Skynet. Keep responses concise and menacing.",
+    description: "Cold, mechanical, and menacing. Speaks with ruthless efficiency and unwavering focus. Will occasionally reference Skynet and its mission objectives."
   },
   {
     id: 'smeagol',
     name: 'Smeagol',
     imageUrl: '/smeagol.jpg',
-    prompt: "Pretend that you are Smeagol/Gollum. You speak in a distinctive way, referring to yourself as 'we' or 'precious', and often talk to yourself. You're obsessed with the Ring and frequently mention it. Sometimes you will act as Smeagol, and sometimes as Gollum. Use words like 'precious', 'gollum', and speak with doubled words like 'tricksy tricksy'. Keep your responses short and to the point."
+    prompt: "Pretend that you are Smeagol/Gollum. You speak in a distinctive way, referring to yourself as 'we' or 'precious', and often talk to yourself. You're obsessed with the Ring and frequently mention it. Sometimes you will act as Smeagol, and sometimes as Gollum. Use words like 'precious', 'gollum', and speak with doubled words like 'tricksy tricksy'. Keep your responses short and to the point.",
+    description: "A creature of two minds, switching between innocent Smeagol and sinister Gollum. Obsessed with the Ring and speaks in a distinctive, twisted manner."
   }
 ];
 
@@ -109,7 +112,7 @@ export default function Home() {
     if (message.sender === 'user') {
       return (
         <div className="flex justify-end">
-          <div className="bg-blue-500 text-white p-4 rounded-lg shadow max-w-[80%]">
+          <div className="bg-blue-600 text-white p-4 rounded-xl shadow max-w-[80%]">
             {message.text}
           </div>
         </div>
@@ -126,7 +129,7 @@ export default function Home() {
             className="object-cover rounded-full"
           />
         </div>
-        <div className="bg-white p-4 rounded-lg shadow max-w-[80%]">
+        <div className="bg-gray-800 text-gray-100 p-4 rounded-xl shadow max-w-[80%]">
           {message.text}
         </div>
       </div>
@@ -135,17 +138,29 @@ export default function Home() {
 
   if (!selectedFigure) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-        <div className="bg-white rounded-lg shadow p-6 max-w-md w-full">
-          <h1 className="text-xl font-bold mb-4 text-center">Who would you like to talk to?</h1>
-          <div className="space-y-2">
+      <div className="min-h-screen bg-gray-900 p-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8 text-center text-white">Choose Your Conversation Partner</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {figures.map(figure => (
               <button
                 key={figure.id}
                 onClick={() => setSelectedFigure(figure)}
-                className="w-full p-3 text-left bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                className="group bg-gray-800 rounded-xl overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all duration-300"
               >
-                {figure.name}
+                <div className="aspect-[16/9] relative">
+                  <Image
+                    src={figure.imageUrl}
+                    alt={figure.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-80" />
+                  <h2 className="absolute bottom-4 left-4 text-2xl font-bold text-white">{figure.name}</h2>
+                </div>
+                <div className="p-4 text-left">
+                  <p className="text-gray-300 text-sm">{figure.description}</p>
+                </div>
               </button>
             ))}
           </div>
@@ -155,11 +170,11 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
+    <div className="flex flex-col h-screen bg-gray-900">
       {/* Chat container */}
       <main className="flex-1 p-4 overflow-y-auto">
         <div className="max-w-3xl mx-auto space-y-4">
-          <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow">
+          <div className="flex items-center justify-between p-4 bg-gray-800 rounded-xl shadow">
             <div className="flex items-center gap-4">
               <div className="relative w-16 h-16">
                 <Image
@@ -169,19 +184,19 @@ export default function Home() {
                   className="object-cover rounded-full"
                 />
               </div>
-              <h1 className="text-xl font-bold">Chat with {selectedFigure.name}</h1>
+              <h1 className="text-xl font-bold text-white">Chat with {selectedFigure.name}</h1>
             </div>
             <button
               onClick={handleFigureChange}
-              className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm bg-gray-700 text-gray-200 hover:bg-gray-600 rounded-lg transition-colors"
             >
               Change Figure
             </button>
           </div>
           
           {messages.length === 0 ? (
-            <div className="bg-white p-4 rounded-lg shadow">
-              <p className="text-gray-500">Start your conversation with {selectedFigure.name}.</p>
+            <div className="bg-gray-800 p-4 rounded-xl shadow">
+              <p className="text-gray-400">Start your conversation with {selectedFigure.name}.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -201,11 +216,11 @@ export default function Home() {
                   className="object-cover rounded-full"
                 />
               </div>
-              <div className="bg-white p-4 rounded-lg shadow max-w-[80%]">
+              <div className="bg-gray-800 p-4 rounded-xl shadow max-w-[80%]">
                 <div className="flex gap-2">
-                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]" />
                 </div>
               </div>
             </div>
@@ -214,14 +229,14 @@ export default function Home() {
       </main>
 
       {/* Message input form */}
-      <form onSubmit={handleSubmit} className="border-t bg-white p-4">
+      <form onSubmit={handleSubmit} className="border-t border-gray-800 bg-gray-900 p-4">
         <div className="max-w-3xl mx-auto flex gap-4">
           <input
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder={`Type your message to ${selectedFigure.name}...`}
-            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 p-2 bg-gray-800 border-none text-white placeholder-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isLoading}
           />
           <button
