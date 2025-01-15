@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import Anthropic from '@anthropic-ai/sdk';
 
 interface Message {
   id: number;
@@ -26,10 +25,6 @@ const figures: Figure[] = [
   }
 ];
 
-const anthropic = new Anthropic({
-  apiKey: process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY,
-});
-
 export default function Home() {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -51,34 +46,42 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const response = await anthropic.messages.create({
-        model: 'claude-3-sonnet-20240229',
-        max_tokens: 1024,
-        system: selectedFigure.prompt,
-        messages: [
-          ...messages.map(msg => ({
-            role: msg.sender,
-            content: msg.text
-          })),
-          { 
-            role: 'user', 
-            content: userMessage.text 
-          }
-        ],
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          systemPrompt: figures[0].prompt,  // Using Terminator's prompt
+          messages: [
+            ...messages.map(msg => ({
+              role: msg.sender,
+              content: msg.text
+            })),
+            { 
+              role: 'user', 
+              content: userMessage.text 
+            }
+          ],
+        }),
       });
 
-      if (response.content[0].type === 'text') {
-        const assistantMessage: Message = {
-          id: Date.now(),
-          text: response.content[0].text,
-          sender: 'assistant',
-        };
+      const data = await response.json();
 
-        setMessages(prev => [...prev, assistantMessage]);
+      if (data.error) {
+        console.error('Error:', data.error);
+        return;
       }
+  
+      const assistantMessage: Message = {
+        id: messages.length + 1,
+        text: data.response,
+        sender: 'assistant'
+      };
+  
+      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Error getting response:', error);
-      // Optionally add error handling UI here
+      console.error('Error:', error);
     } finally {
       setIsLoading(false);
     }
