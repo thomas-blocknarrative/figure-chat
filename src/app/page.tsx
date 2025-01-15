@@ -91,6 +91,8 @@ export default function Home() {
   };
 
   const MessageBubble = ({ message }: { message: Message }) => {
+    if (!selectedFigure) return null;
+    
     if (message.sender === 'user') {
       return (
         <div className="flex justify-end">
@@ -105,8 +107,8 @@ export default function Home() {
       <div className="flex gap-2 items-end">
         <div className="relative w-8 h-8 flex-shrink-0">
           <Image
-            src={selectedFigure!.imageUrl}
-            alt={selectedFigure!.name}
+            src={selectedFigure.imageUrl}
+            alt={selectedFigure.name}
             fill
             className="object-cover rounded-full"
           />
