@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Anthropic from '@anthropic-ai/sdk';
 
 interface Message {
   id: number;
@@ -13,33 +14,74 @@ interface Figure {
   id: string;
   name: string;
   imageUrl: string;
+  prompt: string;
 }
 
 const figures: Figure[] = [
   {
     id: 'terminator',
     name: 'The Terminator',
-    imageUrl: '/terminator.jpg'
+    imageUrl: '/terminator.jpg',
+    prompt: "You are the T-800 Terminator from the first Terminator movie. You speak in a cold, mechanical way, often using phrases like 'Affirmative' and 'Negative'. You're direct, emotionless, and focused on your objectives. You should occasionally reference your cybernetic nature or Skynet. Keep responses concise and menacing."
   }
 ];
+
+const anthropic = new Anthropic({
+  apiKey: process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY,
+});
 
 export default function Home() {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [selectedFigure, setSelectedFigure] = useState<Figure | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim() || !selectedFigure) return;
+    if (!message.trim() || !selectedFigure || isLoading) return;
     
-    const newMessage: Message = {
+    const userMessage: Message = {
       id: Date.now(),
       text: message.trim(),
       sender: 'user',
     };
     
-    setMessages(prev => [...prev, newMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setMessage('');
+    setIsLoading(true);
+
+    try {
+      const response = await anthropic.messages.create({
+        model: 'claude-3-sonnet-20240229',
+        max_tokens: 1024,
+        system: selectedFigure.prompt,
+        messages: [
+          ...messages.map(msg => ({
+            role: msg.sender,
+            content: msg.text
+          })),
+          { 
+            role: 'user', 
+            content: userMessage.text 
+          }
+        ],
+      });
+
+      if (response.content[0].type === 'text') {
+        const assistantMessage: Message = {
+          id: Date.now(),
+          text: response.content[0].text,
+          sender: 'assistant',
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+      }
+    } catch (error) {
+      console.error('Error getting response:', error);
+      // Optionally add error handling UI here
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!selectedFigure) {
@@ -98,6 +140,16 @@ export default function Home() {
               </div>
             ))
           )}
+          
+          {isLoading && (
+            <div className="bg-white p-4 rounded-lg shadow mr-auto max-w-[80%]">
+              <div className="flex gap-2">
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
@@ -110,10 +162,12 @@ export default function Home() {
             onChange={(e) => setMessage(e.target.value)}
             placeholder={`Type your message to ${selectedFigure.name}...`}
             className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={isLoading}
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading}
           >
             Send
           </button>
