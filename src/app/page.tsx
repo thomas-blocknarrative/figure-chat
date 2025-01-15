@@ -113,6 +113,13 @@ export default function Home() {
   
       setMessageId(prev => prev + 1);
       setMessages(prev => [...prev, assistantMessage]);
+
+      if (data.remainingMessages !== undefined) {
+        const remaining = document.createElement('div');
+        remaining.className = 'text-sm text-gray-400 text-center mt-2';
+        remaining.textContent = `${data.remainingMessages} messages remaining today`;
+        document.querySelector('.max-w-3xl')?.appendChild(remaining);
+      }
     } catch (error) {
       console.error('Error:', error);
     } finally {
