@@ -16,7 +16,13 @@ export async function POST(req: Request) {
       messages: messages,
     });
 
-    return NextResponse.json({ response: response.content[0].text });
+    // Check if the content is text type
+    if (response.content[0].type === 'text') {
+      return NextResponse.json({ response: response.content[0].text });
+    }
+
+    // If it's not text, return an error
+    return NextResponse.json({ error: 'Unexpected response type' }, { status: 500 });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json({ error: 'Failed to get response' }, { status: 500 });
