@@ -90,6 +90,34 @@ export default function Home() {
     }
   };
 
+  const MessageBubble = ({ message }: { message: Message }) => {
+    if (message.sender === 'user') {
+      return (
+        <div className="flex justify-end">
+          <div className="bg-blue-500 text-white p-4 rounded-lg shadow max-w-[80%]">
+            {message.text}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex gap-2 items-end">
+        <div className="relative w-8 h-8 flex-shrink-0">
+          <Image
+            src={selectedFigure!.imageUrl}
+            alt={selectedFigure!.name}
+            fill
+            className="object-cover rounded-full"
+          />
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow max-w-[80%]">
+          {message.text}
+        </div>
+      </div>
+    );
+  };
+
   if (!selectedFigure) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
@@ -133,26 +161,29 @@ export default function Home() {
               <p className="text-gray-500">Start your conversation with {selectedFigure.name}.</p>
             </div>
           ) : (
-            messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`p-4 rounded-lg shadow ${
-                  msg.sender === 'user'
-                    ? 'bg-blue-500 text-white ml-auto'
-                    : 'bg-white mr-auto'
-                } max-w-[80%]`}
-              >
-                {msg.text}
-              </div>
-            ))
+            <div className="space-y-4">
+              {messages.map((msg) => (
+                <MessageBubble key={msg.id} message={msg} />
+              ))}
+            </div>
           )}
           
           {isLoading && (
-            <div className="bg-white p-4 rounded-lg shadow mr-auto max-w-[80%]">
-              <div className="flex gap-2">
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]" />
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+            <div className="flex gap-2 items-end">
+              <div className="relative w-8 h-8 flex-shrink-0">
+                <Image
+                  src={selectedFigure.imageUrl}
+                  alt={selectedFigure.name}
+                  fill
+                  className="object-cover rounded-full"
+                />
+              </div>
+              <div className="bg-white p-4 rounded-lg shadow max-w-[80%]">
+                <div className="flex gap-2">
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                  <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce [animation-delay:0.4s]" />
+                </div>
               </div>
             </div>
           )}
