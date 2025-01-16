@@ -9,6 +9,12 @@ interface Message {
   sender: 'user' | 'assistant';
 }
 
+interface StoredMessage {
+  figureId: string;
+  text: string;
+  sender: 'user' | 'assistant';
+}
+
 interface Figure {
   id: string;
   name: string;
@@ -63,10 +69,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFigureChange = () => {
-    // Clear messages when switching figures
-    setMessages([]);
     setSelectedFigure(null);
-    setMessageId(0);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,7 +94,8 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          systemPrompt: selectedFigure.prompt,  // Using the selected figure's prompt
+          systemPrompt: selectedFigure.prompt,
+          figureId: selectedFigure.id,
           messages: [
             ...messages.map(msg => ({
               role: msg.sender,
@@ -129,6 +133,32 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFigureSelect = async (figure: Figure) => {
+    setIsLoading(true);
+    
+    try {
+      const response = await fetch('/api/history');
+      const data = await response.json();
+      
+      // Filter messages for this figure and convert to your Message format
+      const figureMessages = data.messages
+        .filter((msg: StoredMessage) => msg.figureId === figure.id)
+        .map((msg: StoredMessage, index: number) => ({
+          id: index,
+          text: msg.text,
+          sender: msg.sender
+        }));
+      
+      setMessages(figureMessages);
+      setMessageId(figureMessages.length);
+      setSelectedFigure(figure);
+    } catch (error) {
+      console.error('Error loading history:', error);
     } finally {
       setIsLoading(false);
     }
@@ -173,7 +203,7 @@ export default function Home() {
             {figures.map(figure => (
               <button
                 key={figure.id}
-                onClick={() => setSelectedFigure(figure)}
+                onClick={() => handleFigureSelect(figure)}
                 className="group bg-gray-800 rounded-xl overflow-hidden hover:ring-2 hover:ring-blue-500 transition-all duration-300"
               >
                 <div className="aspect-[16/9] relative">
