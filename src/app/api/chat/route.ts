@@ -77,14 +77,8 @@ export async function POST(req: Request) {
       response: response.content[0].text,
       remainingMessages: DAILY_LIMIT - record.count
     });
-  } catch (error: any) {
-    console.error('Error details:', {
-      name: error?.name,
-      message: error?.message,
-      stack: error?.stack
-    });
-    return NextResponse.json({ 
-      error: error?.message || 'Failed to get response'
-    }, { status: 500 });
+  } catch (error: unknown) {
+    console.error('Error:', error);
+    return NextResponse.json({ error: 'Failed to get response' }, { status: 500 });
   }
 }

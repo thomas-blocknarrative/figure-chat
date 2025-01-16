@@ -1,4 +1,4 @@
-import { put, list, del } from '@vercel/blob';
+import { put, list } from '@vercel/blob';
 
 // Define the structure of a stored message
 interface StoredMessage {
@@ -42,7 +42,7 @@ export async function saveMessage(userId: string, message: StoredMessage): Promi
       contentType: 'application/json',
       addRandomSuffix: false // Use exact filename
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error saving message:', error);
   }
 }
